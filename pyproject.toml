@@ -20,6 +20,7 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [project]
+name = "mainapp"
 # Support Python 3.10+.
 requires-python = ">=3.10"
 
