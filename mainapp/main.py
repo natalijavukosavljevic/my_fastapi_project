@@ -59,7 +59,7 @@ def update_item(project_id: UUID, updated_project: Project = None):
 
 #DELETE
 @app.delete("/project/{project_id}", response_model=Project)
-def update_item(project_id: UUID, updated_project: Project = None):
+def delete_item(project_id: UUID, updated_project: Project = None):
     for index, project in enumerate(projects):
         if project.id == project_id:
             deleted_project = projects.pop(index)
