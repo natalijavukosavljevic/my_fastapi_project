@@ -10,4 +10,4 @@ def test_root() -> None:
     """Test main page."""
     response = client.get("/")
     assert response.status_code == 200  # noqa: S101, PLR2004
-    assert response.json() == {"message": "Hello World"}  # noqa: S101
+    assert response.json() == {"message": "Hello World"} # noqa: S101
