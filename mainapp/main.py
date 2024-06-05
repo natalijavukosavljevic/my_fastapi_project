@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 from uuid import UUID, uuid4
+
 #UUID stands for Universally Unique Identifier
 
 # Create FastAPI instance
