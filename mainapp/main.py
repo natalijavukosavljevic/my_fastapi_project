@@ -1,70 +1,86 @@
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, Field
-from uuid import UUID, uuid4
+"""FAST API app imports."""
 
-#UUID stands for Universally Unique Identifier
+
+from uuid import UUID
+
+from fastapi import FastAPI, HTTPException
+from models import Project
+
+# UUID stands for Universally Unique Identifier
 
 # Create FastAPI instance
 app = FastAPI()
-#are name and description required
-class Project(BaseModel):
-    id: UUID = Field(default_factory=uuid4)
-    name: str = None
-    description: str = None
 
-projects = [
-    Project( name="Item 1", description="Description of Item 1"),
-    Project(name="Item 2", description="Description of Item 2"),
-    Project(name="Item 3", description="Description of Item 3"),
-]
-   
 
-# Define route
+
+projects: dict[UUID, Project] = {
+    UUID("47003432-436b-4e57-876e-2ca584dd0187") :
+    Project(id=UUID("47003432-436b-4e57-876e-2ca584dd0187"), name="Item1",
+             description="Description of Item 1"),
+    UUID("4acb1d0e-7f6b-46f4-83c3-4bdd6ccddae2"):
+    Project(id=UUID("4acb1d0e-7f6b-46f4-83c3-4bdd6ccddae2"), name="Item 2",
+            description="Description of Item 2"),
+   UUID("e737bdaa-7bb5-4e88-8504-8196d9a0a1bd"):
+   Project(id=UUID("e737bdaa-7bb5-4e88-8504-8196d9a0a1bd"), name="Item 3",
+            description="Description of Item 3"),
+}
+
+
 @app.get("/")
-async def root():
+async def root() -> dict[str, str]:
+    """Get dict (JSON) for root path."""
     return {"message": "Hello World"}
+
 
 # get projects
 @app.get("/projects")
-async def get_projects():
-    return projects
+async def get_projects() -> list[Project]:
+    """Get list of projects full info(details + documents)."""
+    return list(projects.values())
 
-#create project
-@app.post("/projects")
-def create_item(project: Project):
-    projects.append(project)
-    return projects
-
-
-
-#get project
-projects_dict = {project.id: project for project in projects}
 
 @app.get("/project/{project_id}/info", response_model=Project)
-def get_project_by_id(project_id: UUID):
-    get_project = projects_dict.get(project_id)
-    if get_project:
-        return get_project
-    else:
-         raise HTTPException(status_code=404, 
-                             detail=f"Project {project_id} not found")
-    
-#PUT
+def get_project_by_id(project_id: UUID) -> Project:
+    """Get project's details based on id."""
+    project = projects.get(project_id)
+    if project is None:
+        raise HTTPException(status_code=404, detail="Project not found")
+    return project
+
+
+# create project
+@app.post("/projects", response_model=Project)
+def create_item(project: Project)  -> Project:
+    """Post project."""
+    if project.id in projects:
+        raise HTTPException(status_code=404,
+                            detail
+                            =f"Project with {project.id} already exists.")
+    projects[project.id] = project
+    return project
+
+
+# PUT
 @app.put("/project/{project_id}/info", response_model=Project)
-def update_item(project_id: UUID, updated_project: Project = None):
-    for index, project in enumerate(projects):
-        if project.id == project_id:
-            projects[index] = updated_project
-            return updated_project
-    raise HTTPException(status_code=404, detail="Project not found")
+def update_item(project_id: UUID, project: Project = None) -> Project:
+     """Update project."""
+     if project_id not in projects:
+         raise HTTPException(status_code=404,
+                            detail=f"Project with {project.id} doesn't exist.")
+     if project.id != project_id:
+        raise HTTPException(status_code=400, detail="Project ID mismatch.")
+     projects[project_id] = project
+     return project
 
 
-#DELETE
-@app.delete("/project/{project_id}", response_model=Project)
-def delete_item(project_id: UUID, updated_project: Project = None):
-    for index, project in enumerate(projects):
-        if project.id == project_id:
-            deleted_project = projects.pop(index)
-            return deleted_project
-    raise HTTPException(status_code=404, detail="Project not found")
 
+
+# DELETE
+@app.delete("/project/{project_id}")
+def delete_item(project_id: UUID)-> dict[str,str]:
+     """Delete project."""
+     if project_id not in projects:
+         raise HTTPException(status_code=404,
+                            detail=f"Project with {project_id} doesn't exist.")
+     del projects[project_id]
+     return {"detail": f"Project with {project_id} sucessfully deleted!."}
