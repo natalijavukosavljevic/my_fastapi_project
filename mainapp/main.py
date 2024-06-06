@@ -4,7 +4,8 @@
 from uuid import UUID
 
 from fastapi import FastAPI, HTTPException
-from models import Project
+
+from mainapp.models import Project
 
 # UUID stands for Universally Unique Identifier
 
